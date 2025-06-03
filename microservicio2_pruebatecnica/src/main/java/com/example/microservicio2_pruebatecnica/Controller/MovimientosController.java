@@ -28,21 +28,22 @@ public class MovimientosController {
     @PostMapping("/{cuentaId}")
     public ResponseEntity<?> crearMovimiento(@PathVariable Long cuentaId, @RequestBody Movimientos movimiento) {
         try {
-             movimientosService.crearMovimiento(cuentaId, movimiento);
+             Movimientos movimientoCreado = movimientosService.crearMovimiento(cuentaId, movimiento);
 
              Map<String, Object> payload = new HashMap<>();
             payload.put("cuentaId", cuentaId);
-            payload.put("movimiento", movimiento);
+            payload.put("movimiento", movimientoCreado);
 
-             rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, payload);
+            rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, payload);
 
             return ResponseEntity.ok("Movimiento enviado a la cola correctamente. Se procesará en breve.");
         } catch (RuntimeException e) {
              return ResponseEntity.badRequest().body("Error al crear el movimiento: " + e.getMessage());
         } catch (Exception e) {
-             return ResponseEntity.internalServerError().body("Error al procesar la solicitud: " + e.getMessage());
+            return ResponseEntity.internalServerError().body("Error al procesar la solicitud: " + e.getMessage());
         }
     }
+
 
 
 
